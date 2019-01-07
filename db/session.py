@@ -2,7 +2,8 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///db.db')
+dbpath = 'postgresql://david:david@localhost/findb'
+engine = create_engine(dbpath)
 Session = sessionmaker(bind=engine)
 Session.configure(bind=engine)
 
