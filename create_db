@@ -1,3 +1,0 @@
-python db/update_db.py
-python db/import_indicators.py
-python db/import_tradables.py
