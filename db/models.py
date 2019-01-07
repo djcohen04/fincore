@@ -132,6 +132,7 @@ class Price(Base):
     close = Column(Numeric, nullable=False)
     low = Column(Numeric)
     high = Column(Numeric)
+    volume = Column(Integer)
     time = Column(DateTime, nullable=False)
 
     request_id = Column(Integer, ForeignKey('price_request.id'))
@@ -270,12 +271,14 @@ class PriceRequest(Base, APIRequest):
             high = data[time].get('2. high')
             low = data[time].get('3. low')
             close = data[time].get('4. close')
+            volume = data[time].get('5. volume')
             prices.append(Price(
                 request_id=self.id,
                 time=datetime.datetime.strptime(time, '%Y-%m-%d %H:%M:%S'),
                 open=float(open) if open else None,
                 high=float(high) if high else None,
                 low=float(low) if low else None,
+                volume=int(volume) if volume else None,
                 close=float(close),
             ))
 

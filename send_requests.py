@@ -1,4 +1,5 @@
 import datetime
+import traceback
 from time import sleep
 from db.models import *
 
@@ -20,7 +21,8 @@ if __name__ == '__main__':
             pr.send()
             session.commit()
         except:
-            print("Exception occured: %s" % pr)
+            print("Exception occured for price request: %s" % pr.id)
+            print traceback.format_exc()
         print("Sleeping 15s, zzz")
         sleep(15.1)
 

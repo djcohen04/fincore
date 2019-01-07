@@ -3,7 +3,7 @@ from db.models import *
 
 def deduplicate_prices():
     tradables = session.query(Tradable).all()
-    for tradable in reversed(tradables):
+    for tradable in tradables:
         start = time.time()
 
         prices = tradable.prices()
@@ -20,16 +20,18 @@ def deduplicate_prices():
                 seen.add(ts)
 
         # Delete duplicate ids:
-        session.execute('''
-                DELETE FROM price WHERE id IN (%s);
-            ''' % (
-                ','.join([str(id) for id in duplicates])
+        if duplicates:
+            session.execute('''
+                    DELETE FROM price WHERE id IN (%s);
+                ''' % (
+                    ','.join([str(id) for id in duplicates])
+                )
             )
-        )
-        session.commit()
+            session.commit()
 
-        print "Deleted %s Duplicates for %s in %.2fs" % (len(duplicates), tradable, time.time() - start)
-
+            print "Deleted %s Duplicates for %s in %.2fs" % (len(duplicates), tradable, time.time() - start)
+        else:
+            print "No Duplicates Found for %s (%.2fs)" % (tradable, time.time() - start)
 
 def deduplicate_techicals():
     tradables = session.query(Tradable).all()
