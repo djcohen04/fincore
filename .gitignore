@@ -1,0 +1,4 @@
+*.db
+*.db-journal
+*.pyc
+api_key.py
