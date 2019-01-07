@@ -112,13 +112,11 @@ class Tradable(Base):
         '''
         rawdata = pd.read_sql(query, engine)
 
-        dates = [datetime.datetime.strptime(d, '%Y-%m-%d').date() for d in set(rawdata.date)]
-        data = {date: {} for date in dates}
+        data = {date: {} for date in set(rawdata.date)}
         for i in range(len(rawdata)):
             row = rawdata.iloc[i]
-            date = datetime.datetime.strptime(row.date, '%Y-%m-%d').date()
             for key, value in json.loads(row['values']).iteritems():
-                data[date][key] = value
+                data[row.date][key] = value
 
         return pd.DataFrame(data).transpose()
 
