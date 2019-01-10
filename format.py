@@ -14,13 +14,14 @@ class FeatureData(object):
         print "Ouput Shape: %s" % (outputs.shape,)
         print "Features: %s" % len(features)
     '''
-    def __init__(self, tradable):
+    def __init__(self, tradable, dropna=True):
         # Search for Tradable:
         self.tradable = session.query(Tradable).filter_by(name=tradable).first()
         if self.tradable is None:
             raise Exception("Tradable %s Note Found" % tradable)
 
         print "Found Tradable %s" % self.tradable
+        self.dropna = dropna
         self.fetchdata()
 
     def fetchdata(self):
@@ -28,6 +29,8 @@ class FeatureData(object):
         '''
         print "Fetching Raw Tradable Data from Database..."
         self.rawdata = self.tradable.data()
+        if self.dropna:
+            self.rawdata = self.rawdata.dropna()
 
     def format(self, hard=False):
         ''' Returns a 3-tuple:
@@ -41,7 +44,7 @@ class FeatureData(object):
             self.fetchdata()
 
         # Collect the list of auxiliary features:
-        nonaux = set(['close', 'open', 'high', 'low', 'time'])
+        nonaux = set(['close', 'open', 'high', 'low', 'time', 'volume'])
         auxilliary = list(set(self.rawdata.columns).difference(nonaux))
         auxilliary.sort()
 
