@@ -1,3 +1,4 @@
+import json
 import time
 from db.models import *
 
@@ -39,16 +40,28 @@ def deduplicate_techicals():
 
     for tradable in tradables:
         for technical in technicals:
-            print("Deduplicating %s %s" % (tradable.name, str(technical)))
-            indicators = tradable.technicals(technical)
+            print("Deduplicating %s %s..." % (tradable.name, str(technical)))
+
+            # Collect the Indicator values for this Tradable/Techincal Pair:
+            technical_requests = session.query(TechnicalRequest).filter_by(tradable_id=tradable.id, technical_indicator_id=technical.id).all()
+            indicators = []
+            for request in technical_requests:
+                indicators += request.values
+
             count = 0
-            dates = set()
+            dates = {}
             for indicator in indicators:
                 if indicator.date in dates:
-                    count += 1
-                    session.delete(indicator)
+                    # Make sure this is indeed a duplicate:
+                    oldval = json.loads(dates[indicator.date])
+                    newval = json.loads(indicator.values)
+                    if oldval == newval:
+                        count += 1
+                        session.delete(indicator)
+                    else:
+                        print 'WARNING: %s != %s (%s)' % (oldval, newval, indicator.date)
                 else:
-                    dates.add(indicator.date)
+                    dates[indicator.date] = indicator.values
             session.commit()
 
             if count:
@@ -59,5 +72,5 @@ def deduplicate_techicals():
 
 
 if __name__ == '__main__':
-    deduplicate_prices()
-    # deduplicate_techicals()
+    # deduplicate_prices()
+    deduplicate_techicals()

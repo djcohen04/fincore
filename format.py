@@ -1,5 +1,6 @@
 import time
 import numpy as np
+from vix import VIXData
 from db.models import *
 
 
@@ -34,9 +35,10 @@ class FeatureData(object):
         print "Ouput Shape: %s" % (outputs.shape,)
         print "Features: %s" % len(features)
     '''
-    def __init__(self, symbol, dropna=True):
+    def __init__(self, symbol, dropna=True, getvix=False):
         self.symbol = symbol
         self.dropna = dropna
+        self.getvix = getvix
 
         # Search for Tradable:
         self.tradable = session.query(Tradable).filter_by(name=symbol).first()
@@ -51,8 +53,20 @@ class FeatureData(object):
         '''
         print "Fetching Raw Tradable Data from Database..."
         self.rawdata = self.tradable.data()
+
+        # Drop NaN values
         if self.dropna:
             self.rawdata = self.rawdata.dropna()
+
+        if self.getvix:
+            # Load & Concatenate VIX prices dataframe:
+            vix = VIXData.get(self.rawdata.time)
+            vix.index = self.rawdata.index
+            self.rawdata = pd.concat([self.rawdata, vix], axis=1)
+
+            # Might need to drop newly introduced NaN values:
+            if self.dropna:
+                self.rawdata = self.rawdata.dropna()
 
     def format(self, period=30, forecast=10):
         ''' Returns a 3-tuple:
