@@ -361,23 +361,29 @@ class TechnicalRequest(Base, APIRequest):
         fn_name = self.technical_indicator.serialized().get('function')
         self.readin_data(result.get('Technical Analysis: ' + fn_name), cutoff=cutoff)
 
-
     def readin_data(self, data, cutoff=None):
         # Loop through data points
         values = []
-        for time in data.keys():
-            date = datetime.datetime.strptime(time, '%Y-%m-%d').date()
-            if cutoff and date < cutoff:
+        for timestamp, rawdata in data.iteritems():
+            try:
+                date = datetime.datetime.strptime(timestamp, '%Y-%m-%d').date()
+                if cutoff and date < cutoff:
+                    continue
+
+                values.append(TechnicalIndicatorValue(
+                    request_id=self.id,
+                    date=date,
+                    values=json.dumps(rawdata),
+                ))
+
+            except:
+                print("Invalid Data Point, Skipping (%s: %s)" % (timestamp, rawdata))
                 continue
-            values.append(TechnicalIndicatorValue(
-                request_id=self.id,
-                date=date,
-                values=json.dumps(data[time]),
-            ))
 
         # Try bulk insert into database
         try:
             session.bulk_save_objects(values)
+            print 'Successfully saved %s "%s" Values for Tradable %s' % (len(values), self.technical_indicator, self.tradable)
         except:
             print("Couldn't save technical request %s data:" % self.id)
             print(traceback.format_exc())
@@ -386,3 +392,14 @@ class TechnicalRequest(Base, APIRequest):
             # Mark as unsuccessful
             self.successful = False
             session.commit()
+
+
+if __name__ == '__main__':
+    spy = session.query(Tradable).first()
+    technical = session.query(TechnicalIndicator).first()
+    request = TechnicalRequest(tradable=spy, technical_indicator=technical)
+    session.add(request)
+    session.commit()
+
+    request.send(cutoff=datetime.date(2018, 8, 1))
+    session.commit()
