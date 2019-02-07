@@ -370,11 +370,8 @@ class TechnicalRequest(Base, APIRequest):
                 if cutoff and date < cutoff:
                     continue
 
-                values.append(TechnicalIndicatorValue(
-                    request_id=self.id,
-                    date=date,
-                    values=json.dumps(rawdata),
-                ))
+                value = TechnicalIndicatorValue(request=self, date=date, values=json.dumps(rawdata))
+                values.append(value)
 
             except:
                 print("Invalid Data Point, Skipping (%s: %s)" % (timestamp, rawdata))
