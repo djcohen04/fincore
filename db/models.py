@@ -107,15 +107,17 @@ class Tradable(Base):
         '''
         query = '''
             SELECT * FROM technical_indicator_value WHERE request_id IN (
-                SELECT id FROM technical_request where tradable_id=1
+                SELECT id FROM technical_request where tradable_id=%s
             );
-        '''
+        ''' % self.id
         rawdata = pd.read_sql(query, engine)
 
         data = {date: {} for date in set(rawdata.date)}
         for i in range(len(rawdata)):
             row = rawdata.iloc[i]
             for key, value in json.loads(row['values']).iteritems():
+                # RMK: This overwrites other n-day metrics, since they are
+                # all stored as 'SMA', as opposed to, eg. SMA-5
                 data[row.date][key] = value
 
         return pd.DataFrame(data).transpose()
