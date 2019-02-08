@@ -6,6 +6,15 @@ from db.models import *
 
 class Helpers():
     @classmethod
+    def float(cls, value):
+        ''' Try to typecast as a float
+        '''
+        try:
+            return float(value)
+        except:
+            return value
+
+    @classmethod
     def spans(cls, window, period):
         ''' Check if the given window spans the given period size
         '''
@@ -132,6 +141,10 @@ class FeatureData(object):
 
             # Aggregate all features to create a Unified Feature Array:
             input = closes + opens + highs + lows + times + additional
+
+            # Try to typecast all values as floats:
+            input = [Helpers.float(v) for v in input]
+
             # Add new observation to full inputs list:
             inputs.append(input)
 
