@@ -72,5 +72,5 @@ def deduplicate_techicals():
 
 
 if __name__ == '__main__':
-    # deduplicate_prices()
+    deduplicate_prices()
     deduplicate_techicals()
