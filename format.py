@@ -54,6 +54,11 @@ class FeatureData(object):
         print "Fetching Raw Tradable Data from Database..."
         self.rawdata = self.tradable.data()
 
+        # Make sure there are no duplicate timestamps in the timeseries:
+        timeseries = self.rawdata.time
+        if len(set(timeseries)) != len(timeseries):
+            raise Exception('Error: Duplicate Time Stamps Exist in the Database, please deduplicate before proceeding')
+
         # Drop NaN values
         if self.dropna:
             self.rawdata = self.rawdata.dropna()
