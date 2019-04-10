@@ -370,6 +370,9 @@ class TechnicalRequest(Base, APIRequest):
         values = []
         for timestamp, rawdata in data.iteritems():
             try:
+                # We sometimes get a weird ' hh:mm:ss' appended to the string, so
+                # here we make sure that that is removed from the parsed date string:
+                timestamp = timestamp.split(' ')[0]
                 date = datetime.datetime.strptime(timestamp, '%Y-%m-%d').date()
                 if cutoff and date < cutoff:
                     continue
