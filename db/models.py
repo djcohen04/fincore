@@ -13,6 +13,8 @@ from api_key import API_KEY
 
 
 class Tradable(Base):
+    ''' Class to Represent a Stock Market Equity
+    '''
     __tablename__ = 'tradable'
     id = Column(Integer, primary_key=True)
 
@@ -56,7 +58,7 @@ class Tradable(Base):
         for technical, values in technicaldata.iteritems():
             data[technical] = values
 
-        print "Loaded All Feature Time Series Data For %s in %.2fs" % (self, time.time() - start)
+        print "Loaded All Return and Feature Time Series Data For %s in %.2fs" % (self, time.time() - start)
         return data
 
     def returns(self, date=None):
@@ -216,6 +218,7 @@ class APIRequest():
         else:
             self.sent = True
             self.time_sent = datetime.datetime.now()
+            session.commit()
             return requests.get(self.url).json()
 
 
@@ -337,7 +340,7 @@ class TechnicalRequest(Base, APIRequest):
             return
 
         # Send request:
-        print("Sending Technical Request %s" % self.id)
+        print("Sending Technical Request %s..." % self)
         result = self._send()
 
         # Read in result:
@@ -376,8 +379,7 @@ class TechnicalRequest(Base, APIRequest):
                 date = datetime.datetime.strptime(timestamp, '%Y-%m-%d').date()
                 if cutoff and date < cutoff:
                     continue
-
-                value = TechnicalIndicatorValue(request=self, date=date, values=json.dumps(rawdata))
+                value = TechnicalIndicatorValue(request_id=self.id, date=date, values=json.dumps(rawdata))
                 values.append(value)
 
             except Exception as e:
@@ -385,10 +387,12 @@ class TechnicalRequest(Base, APIRequest):
                 print("Invalid Data Point, Skipping (%s: %s)" % (timestamp, rawdata))
                 continue
 
+
         # Try bulk insert into database
         try:
             session.bulk_save_objects(values)
-            print 'Successfully saved %s "%s" Values for Tradable %s' % (len(values), self.technical_indicator, self.tradable)
+            session.commit()
+            print 'Successfully saved %s Values for %s' % (len(values), self)
         except:
             print("Couldn't save technical request %s data:" % self.id)
             print(traceback.format_exc())
@@ -397,6 +401,9 @@ class TechnicalRequest(Base, APIRequest):
             # Mark as unsuccessful
             self.successful = False
             session.commit()
+
+    def __repr__(self):
+        return '<%s %s: %s>' % (self.id, self.tradable.name, self.technical_indicator)
 
 
 if __name__ == '__main__':

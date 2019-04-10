@@ -13,12 +13,11 @@ def create_price_request(tradable, commit=False):
         session.commit()
 
 def create_technical_request(tradable, technical, commit=False):
-    print("Creating technical Request for %s: %s" % (tradable.name, technical.id))
-    session.add(TechnicalRequest(
-        tradable_id=tradable.id,
-        technical_indicator_id=technical.id
-    ))
-
+    ''' Create a technical request for the given tradable/technical pair
+    '''
+    print "Creating technical Request for '%s' on %s..." % (tradable, technical)
+    tr = TechnicalRequest(tradable_id=tradable.id, technical_indicator_id=technical.id)
+    session.add(tr)
     if commit:
         session.commit()
 

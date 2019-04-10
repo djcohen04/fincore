@@ -33,12 +33,12 @@ if __name__ == '__main__':
             tr.send(cutoff=cutoff)
             session.commit()
         except Exception as e:
-            print traceback.format_exc()
             session.rollback()
-            raise e
-            # tr.sent = True
-            # tr.successful = False
-            # session.commit()
+            print 'An Exception Occured With Technical Request %s:' % tr
+            print traceback.format_exc()
+            tr.sent = True
+            tr.successful = False
+            session.commit()
 
         print("Sleeping 15s, zzz")
         sleep(15.1)
