@@ -215,7 +215,7 @@ class APIRequest():
             return
         else:
             self.sent = True
-            self.time_sent = datetime.datetime.utcnow()
+            self.time_sent = datetime.datetime.now()
             return requests.get(self.url).json()
 
 
@@ -322,10 +322,12 @@ class TechnicalRequest(Base, APIRequest):
 
     @property
     def url(self):
+        indicator = self.technical_indicator
+        args = indicator.get_args()
         return 'https://www.alphavantage.co/query?symbol=%s&apikey=%s&%s' % (
             self.tradable.name,
             API_KEY,
-            self.technical_indicator.get_args()
+            args
         )
 
     def send(self, cutoff=None):
@@ -375,7 +377,8 @@ class TechnicalRequest(Base, APIRequest):
                 value = TechnicalIndicatorValue(request=self, date=date, values=json.dumps(rawdata))
                 values.append(value)
 
-            except:
+            except Exception as e:
+                raise e
                 print("Invalid Data Point, Skipping (%s: %s)" % (timestamp, rawdata))
                 continue
 
@@ -394,6 +397,7 @@ class TechnicalRequest(Base, APIRequest):
 
 
 if __name__ == '__main__':
+
     spy = session.query(Tradable).first()
     technical = session.query(TechnicalIndicator).first()
     request = TechnicalRequest(tradable=spy, technical_indicator=technical)

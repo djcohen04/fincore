@@ -32,9 +32,13 @@ if __name__ == '__main__':
             cutoff = datetime.date(2018, 8, 1)
             tr.send(cutoff=cutoff)
             session.commit()
-        except:
-            tr.successful = False
-            session.commit()
+        except Exception as e:
+            print traceback.format_exc()
+            session.rollback()
+            raise e
+            # tr.sent = True
+            # tr.successful = False
+            # session.commit()
 
         print("Sleeping 15s, zzz")
         sleep(15.1)
