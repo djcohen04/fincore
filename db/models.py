@@ -247,7 +247,7 @@ class PriceRequest(Base, APIRequest):
             return
 
         # Send request:
-        print("Sending Price Request %s" % self.id)
+        print("Sending Price Request %s" % self)
         result = self._send()
 
         # Read in result:
@@ -266,6 +266,8 @@ class PriceRequest(Base, APIRequest):
 
         # Read in the data:
         self.readin_data(result.get('Time Series (1min)'))
+
+        print 'Requested %s successfully' % self
 
     def readin_data(self, data):
         # Loop through data points
@@ -299,6 +301,8 @@ class PriceRequest(Base, APIRequest):
             self.successful = False
             session.commit()
 
+    def __repr__(self):
+        return '<PriceRequest %s: %s>' % (self.id, self.tradable.name)
 
 
 
@@ -403,7 +407,7 @@ class TechnicalRequest(Base, APIRequest):
             session.commit()
 
     def __repr__(self):
-        return '<%s %s: %s>' % (self.id, self.tradable.name, self.technical_indicator)
+        return '<TechnicalRequest %s: %s - %s>' % (self.id, self.tradable.name, self.technical_indicator)
 
 
 if __name__ == '__main__':
