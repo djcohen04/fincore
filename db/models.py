@@ -233,14 +233,15 @@ class PriceRequest(Base, APIRequest):
     tradable_id = Column(Integer, ForeignKey('tradable.id'), nullable=False)
 
     @property
-    def url(self):
-        # API Request url to get intraday prices:
-        return 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=%s&interval=1min&outputsize=full&apikey=%s' % (
-            self.tradable.name,
-            API_KEY
-        )
+    def url(self, min=1):
+        ''' Gets the API url for intraday (1m) prices for this request
+        '''
+        args = (self.tradable.name, min, API_KEY)
+        return 'https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=%s&interval=%smin&outputsize=full&apikey=%s' % args
 
-    def send(self):
+    def send(self, cutoff=None):
+        ''' Sends this PriceRequest to the AlphaVantage API
+        '''
         if self.sent:
             # Only send a request once
             print("Request %s already sent" % self.id)
@@ -259,15 +260,13 @@ class PriceRequest(Base, APIRequest):
             session.commit()
             return
 
-        # Request Seems to have been successful
+        # Save the Request Meta Data:
         self.meta = json.dumps(result.get('Meta Data'))
         self.successful = True
         session.commit()
 
         # Read in the data:
         self.readin_data(result.get('Time Series (1min)'))
-
-        print 'Requested %s successfully' % self
 
     def readin_data(self, data):
         # Loop through data points
@@ -396,7 +395,6 @@ class TechnicalRequest(Base, APIRequest):
         try:
             session.bulk_save_objects(values)
             session.commit()
-            print 'Successfully saved %s Values for %s' % (len(values), self)
         except:
             print("Couldn't save technical request %s data:" % self.id)
             print(traceback.format_exc())
