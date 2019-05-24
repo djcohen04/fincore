@@ -1,6 +1,7 @@
 import json
 import requests
 import datetime
+import traceback
 from time import sleep
 from db.models import *
 
