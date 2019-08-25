@@ -137,7 +137,7 @@ class XYData(object):
         outtest = np.concatenate([day.outputs for day in testdays])
 
         # Return the newly formatted 4-tuple:
-        return intrain, outtrain, intest, outtest
+        return intrain, np.ravel(outtrain), intest, np.ravel(outtest)
 
     def getbuckets(self):
         '''
