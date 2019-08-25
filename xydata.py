@@ -103,10 +103,6 @@ class XYData(object):
         This data dictionary should be well-suited for random splitting into
         training and testing data, in the process of constructing a machine
         learning model
-        eg.
-            xydata = XYData('SPY')
-            intrain, outtrain, intest, outtest = xydata.getsplit()
-
     '''
     def __init__(self, symbol, lookback=30, forecast=10):
         self.lookback = lookback
