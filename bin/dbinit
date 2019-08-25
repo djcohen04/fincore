@@ -1,3 +1,0 @@
-python ../db/dbinit.py
-python ../data/indicators.py
-python ../data/tradables.py

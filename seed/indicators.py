@@ -1,3 +1,6 @@
+''' Seed Data Script: Technical Indicators
+'''
+
 from models import *
 
 indicators = [{

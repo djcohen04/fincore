@@ -1,3 +1,6 @@
+''' Seed Data Script: Tradables
+'''
+
 from models import *
 
 if __name__ == '__main__':
